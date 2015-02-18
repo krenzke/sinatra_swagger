@@ -29,4 +29,8 @@ module SinatraSwagger
     handles method_call(:delete)
     handles method_call(:patch)
   end
+
+  def self.root
+    File.dirname __dir__
+  end
 end
