@@ -19,24 +19,32 @@ module SinatraSwagger
       parse_options(*args)
 
       # for storing all the path info we're going to parse
-      info = {
-        version: '1.0.0',
-        title: '',
-        description: '',
+      api_docs = {
+        swagger: "2.0",
+        schemes: ["http"],
+        paths: {},
+        info: {
+          version: '1.0.0',
+          title: '',
+          description: '',
+        },
       }
-      paths = {}
+
 
       # define the handler method, do it with a class_eval so
       # we have access to the surrounding scope and can modify
-      # the 'paths' object
+      # the 'api_docs' object
       ::SinatraSwagger::ApiParseHandler.class_eval do
         define_method(:process) do
           parsed_comments = YARD::Docstring.parser.parse(statement.comments)
           split_text = parsed_comments.text.split("\n\n")
 
           if statement.type == :class
-            info[:title] = split_text[0]
-            info[:description] = split_text.size > 1 ? split_text[1..-1].join("\n") : ''
+            api_docs[:info][:title] = split_text[0]
+            api_docs[:info][:description] = split_text.size > 1 ? split_text[1..-1].join("\n") : ''
+            if version_tag = parsed_comments.tags.find{ |t| t.tag_name == 'api_version' }
+              api_docs[:info][:version] = version_tag.text
+            end
           else # an api endpoint
             route = statement.parameters(false).jump(:tstring_content).source
             verb  = statement.method_name(true).to_s
@@ -53,8 +61,8 @@ module SinatraSwagger
               }
             end
 
-            paths[route] ||= {}
-            paths[route][verb] = {
+            api_docs[:paths][route] ||= {}
+            api_docs[:paths][route][verb] = {
               summary: summary,
               description: description,
               parameters: parameters,
@@ -68,7 +76,7 @@ module SinatraSwagger
 
       # write to output, create directories if needed
       FileUtils.mkdir_p(File.dirname(@options[:output_file]))
-      File.open(@options[:output_file], 'w') { |f| f.write(DEFAULT_API_HASH.merge(info: info, paths: paths).to_json) }
+      File.open(@options[:output_file], 'w') { |f| f.write(api_docs.to_json) }
     end
 
     def parse_options(*args)
