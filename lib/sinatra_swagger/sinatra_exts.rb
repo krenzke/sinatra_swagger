@@ -6,7 +6,8 @@ if defined?(Sinatra)
         send_file File.join(SinatraSwagger.root, 'web', 'api_index.html')
       end
 
-      get '*' do
+      # handle swagger ui assets
+      get %r{/.+\.[css|js|png|gif|eot|svg|ttf|woff|woff2]} do
         full_path = File.join(SinatraSwagger.root, 'web', request.path)
         if File.exist?(full_path)
           send_file full_path
