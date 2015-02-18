@@ -19,6 +19,11 @@ module SinatraSwagger
       parse_options(*args)
 
       # for storing all the path info we're going to parse
+      info = {
+        version: '1.0.0',
+        title: '',
+        description: '',
+      }
       paths = {}
 
       # define the handler method, do it with a class_eval so
@@ -27,28 +32,34 @@ module SinatraSwagger
       ::SinatraSwagger::ApiParseHandler.class_eval do
         define_method(:process) do
           parsed_comments = YARD::Docstring.parser.parse(statement.comments)
-          route = statement.parameters(false).jump(:tstring_content).source
-          verb  = statement.method_name(true).to_s
+          split_text = parsed_comments.text.split("\n\n")
 
-          raw_text = parsed_comments.text.split("\n\n")
-          summary = raw_text[0]
-          description = raw_text.size > 1 ? raw_text[1..-1].join("\n") : summary
-          parameters = parsed_comments.tags.select{|t| t.tag_name == 'api_param' }.map do |t|
-            {
-              in: 'body',
-              name: t.name,
-              description: t.text,
-              required: t.types.include?('requried'),
-              type: t.types[0],
+          if statement.type == :class
+            info[:title] = split_text[0]
+            info[:description] = split_text.size > 1 ? split_text[1..-1].join("\n") : ''
+          else # an api endpoint
+            route = statement.parameters(false).jump(:tstring_content).source
+            verb  = statement.method_name(true).to_s
+
+            summary = split_text[0]
+            description = split_text.size > 1 ? split_text[1..-1].join("\n") : summary
+            parameters = parsed_comments.tags.select{|t| t.tag_name == 'api_param' }.map do |t|
+              {
+                in: 'body',
+                name: t.name,
+                description: t.text,
+                required: t.types.include?('requried'),
+                type: t.types[0],
+              }
+            end
+
+            paths[route] ||= {}
+            paths[route][verb] = {
+              summary: summary,
+              description: description,
+              parameters: parameters,
             }
           end
-
-          paths[route] ||= {}
-          paths[route][verb] = {
-            summary: summary,
-            description: description,
-            parameters: parameters,
-          }
         end
       end
 
@@ -57,7 +68,7 @@ module SinatraSwagger
 
       # write to output, create directories if needed
       FileUtils.mkdir_p(File.dirname(@options[:output_file]))
-      File.open(@options[:output_file], 'w') { |f| f.write(DEFAULT_API_HASH.merge(paths: paths).to_json) }
+      File.open(@options[:output_file], 'w') { |f| f.write(DEFAULT_API_HASH.merge(info: info, paths: paths).to_json) }
     end
 
     def parse_options(*args)

@@ -8,11 +8,6 @@ module SinatraSwagger
 
   DEFAULT_API_HASH = {
     swagger: "2.0",
-    info: {
-      description: "This is the description",
-      version: "1.0.0",
-      title: "Swagger Petstore",
-    },
     host: "petstore.swagger.io",
     basePath: "/v2",
     schemes: ["http"],
@@ -23,6 +18,7 @@ module SinatraSwagger
   # TODO will this interfer with normal yard operation if someone
   # includes this gem and then calls yard?
   class ApiParseHandler < YARD::Handlers::Ruby::Base
+    handles :class
     handles method_call(:get)
     handles method_call(:put)
     handles method_call(:post)
