@@ -42,11 +42,12 @@ end
 
 ### Add Swagger UI to Your App
 SinatraSwagger includes the basic [Swagger UI](https://github.com/swagger-api/swagger-ui). To enable the necessary routes just add a call to `enable_swagger_doc_endpoint` in your Sinatra app. The default is to use the path `/api-docs`, but this can be changed by passing a `path: '/your_path'` options to the method call.
-    ```ruby
-    class PivotApp < Sinatra::Base
-      enable_swagger_doc_endpoint
-    end
-    ```
+
+```ruby
+class PivotApp < Sinatra::Base
+  enable_swagger_doc_endpoint
+end
+```
 
 ## Contributing
 
