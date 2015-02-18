@@ -29,9 +29,25 @@ module SinatraSwagger
           parsed_comments = YARD::Docstring.parser.parse(statement.comments)
           route = statement.parameters(false).jump(:tstring_content).source
           verb  = statement.method_name(true).to_s
+
+          raw_text = parsed_comments.text.split("\n\n")
+          summary = raw_text[0]
+          description = raw_text.size > 1 ? raw_text[1..-1].join("\n") : summary
+          parameters = parsed_comments.tags.select{|t| t.tag_name == 'api_param' }.map do |t|
+            {
+              in: 'body',
+              name: t.name,
+              description: t.text,
+              required: t.types.include?('requried'),
+              type: t.types[0],
+            }
+          end
+
           paths[route] ||= {}
           paths[route][verb] = {
-            description: parsed_comments.text,
+            summary: summary,
+            description: description,
+            parameters: parameters,
           }
         end
       end
