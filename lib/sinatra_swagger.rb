@@ -1,5 +1,32 @@
-require "sinatra_swagger/version"
+require 'sinatra_swagger/version'
+require 'sinatra_swagger/sinatra_exts'
+require 'sinatra_swagger/cli'
+require 'yard'
 
 module SinatraSwagger
-  # Your code goes here...
+  YARD::Tags::Library.define_tag('API Parameter', :api_param, :with_types_and_name)
+
+  DEFAULT_API_HASH = {
+    swagger: "2.0",
+    info: {
+      description: "This is the description",
+      version: "1.0.0",
+      title: "Swagger Petstore",
+    },
+    host: "petstore.swagger.io",
+    basePath: "/v2",
+    schemes: ["http"],
+    paths: {}
+  }
+
+  # register a handler with Yard
+  # TODO will this interfer with normal yard operation if someone
+  # includes this gem and then calls yard?
+  class ApiParseHandler < YARD::Handlers::Ruby::Base
+    handles method_call(:get)
+    handles method_call(:put)
+    handles method_call(:post)
+    handles method_call(:delete)
+    handles method_call(:patch)
+  end
 end

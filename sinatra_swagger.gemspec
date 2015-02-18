@@ -8,13 +8,13 @@ Gem::Specification.new do |spec|
   spec.version       = SinatraSwagger::VERSION
   spec.authors       = ["Tom Krenzke"]
   spec.email         = ["tom.krenzke@hyfn.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = "Generate Swagger api docs by parsing your Sinatra code"
+  spec.summary       = "Generate Swagger api docs by parsing your Sinatra code"
   spec.homepage      = ""
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.executables   = ['sinswag']
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
