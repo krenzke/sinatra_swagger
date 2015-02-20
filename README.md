@@ -51,7 +51,7 @@ You can also document the main class and SinatraSwagger will pull the API title,
 #
 # @api_version 1.2
 class MyApp < Sinatra::Base
-  enable_swagger_doc_endpoint
+  ... your app code here ...
 end
 ```
 
